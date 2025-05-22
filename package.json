@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/kapit4n/denti-code-patients-api#readme",
   "dependencies": {
+    "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "sqlite3": "^5.1.7"
   },
