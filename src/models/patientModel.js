@@ -12,6 +12,10 @@ const Patient = {
   findAll: (callback) => {
     const sql = `SELECT * FROM Patients ORDER BY LastName, FirstName`
     db.all(sql, [], callback)
+  },
+  findById: (id, callback) => {
+    const sql = `SELECT * from Patients WHERE PatientID = ?`
+    db.get(sql, [id], callback)
   }
 }
 

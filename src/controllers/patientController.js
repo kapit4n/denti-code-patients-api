@@ -22,3 +22,15 @@ exports.getAllPatients = (req, res, next) => {
   })
 }
 
+exports.getPatientById = (req, res, next) => {
+  Patient.findById(req.params.id, (err, patient) => {
+    if (err) return next(err)
+
+      if (!patient) {
+        return res.status(404).json({ message: 'Patient not found'})
+      }
+
+      res.status(200).json(patient)
+  })
+}
+
