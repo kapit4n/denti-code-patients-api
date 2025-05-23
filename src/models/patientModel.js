@@ -11,7 +11,7 @@ const Patient = {
   },
   findAll: (callback) => {
     const sql = `SELECT * FROM Patients ORDER BY LastName, FirstName`
-    db.get(sql, [], callback)
+    db.all(sql, [], callback)
   }
 }
 

@@ -11,7 +11,7 @@ const db  = new sqlite3.Database(DB_PATH, (err) => {
             PatientID INTEGER PRIMARY KEY AUTOINCREMENT,
             FirstName TEXT NOT NULL,
             LastName TEXT NOT NULL,
-            DateOfBirth TEXT NOT NULL, // Store as ISO8601 string (YYYY-MM-DD)
+            DateOfBirth TEXT NOT NULL, 
             Gender TEXT,
             Address TEXT,
             ContactPhone TEXT NOT NULL UNIQUE,
