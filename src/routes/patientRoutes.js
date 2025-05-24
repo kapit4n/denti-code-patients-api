@@ -1,8 +1,9 @@
 const express = require('express')
 const router = express.Router()
 const patientController = require('../controllers/patientController')
+const { postValidator, validate } = require('../middleware/requestValidator')
 
-router.post('/', patientController.createPatient)
+router.post('/', postValidator, validate, patientController.createPatient)
 router.get('/', patientController.getAllPatients)
 router.get('/:id', patientController.getPatientById)
 router.put('/:id', patientController.updatePatient)
