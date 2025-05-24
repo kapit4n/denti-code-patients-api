@@ -29,6 +29,12 @@ const Patient = {
     db.run(sql, [FirstName, LastName, DateOfBirth, Gender, Address, ContactPhone, Email, MedicalHistorySummary, LastVisitDate, id], function (err) {
       callback(err, { changes: this ? this.changes: 0 })
     })
+  },
+  delete: (id, callback) => {
+    const sql = `DELETE FROM Patients WHERE PatientID = ?`
+    db.run(sql, [id], function(err) {
+      callback(err, { changes: this ? this.changes: 0 })
+    })
   }
 }
 

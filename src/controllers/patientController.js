@@ -44,3 +44,13 @@ exports.updatePatient = (req, res, next) => {
   })
 }
 
+exports.deletePatient = (req, res, next) => {
+  Patient.delete(req.params.id, (err, result) => {
+    if (err) return next(err)
+      if (result.changes === 0) {
+        return res.status(404).json({ message: 'Patient not found' })
+      }
+      res.status(200).json({ message: 'Patient deleted successfully' })
+  })
+}
+
