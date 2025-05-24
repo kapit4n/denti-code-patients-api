@@ -34,3 +34,13 @@ exports.getPatientById = (req, res, next) => {
   })
 }
 
+exports.updatePatient = (req, res, next) => {
+  Patient.update(req.params.id, req.body, (err, result) => {
+    if (err) return next(err)
+    if (result.changes === 0) {
+      return res.status(404).json({ message: 'Patient not found or no changes made' })
+    }
+    res.status(200).json({ message: 'Patient updated successfully'})
+  })
+}
+

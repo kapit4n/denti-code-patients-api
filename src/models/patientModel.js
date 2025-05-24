@@ -16,6 +16,19 @@ const Patient = {
   findById: (id, callback) => {
     const sql = `SELECT * from Patients WHERE PatientID = ?`
     db.get(sql, [id], callback)
+  },
+  update: (id, patientData, callback) => {
+    const { FirstName, LastName, DateOfBirth, Gender, Address, ContactPhone, Email, MedicalHistorySummary, LastVisitDate } = patientData
+
+    const sql = `UPDATE Patients SET
+                        FirstName = ?, LastName = ?, DateOfBirth = ?, Gender = ?,
+                        Address = ?, ContactPhone = ?, Email = ?, MedicalHistorySummary = ?,
+                        LastVisitDate = COALESCE(?, LastVisitDate)
+                     WHERE PatientID = ?`;
+    
+    db.run(sql, [FirstName, LastName, DateOfBirth, Gender, Address, ContactPhone, Email, MedicalHistorySummary, LastVisitDate, id], function (err) {
+      callback(err, { changes: this ? this.changes: 0 })
+    })
   }
 }
 
