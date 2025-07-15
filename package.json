@@ -8,6 +8,9 @@
     "dev": "nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kapit4n/denti-code-patients-api.git"
@@ -20,10 +23,13 @@
   },
   "homepage": "https://github.com/kapit4n/denti-code-patients-api#readme",
   "dependencies": {
+    "@prisma/client": "^6.11.1",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "express-validator": "^7.2.1",
-    "sqlite3": "^5.1.7"
+    "prisma": "^6.11.1",
+    "sqlite3": "^5.1.7",
+    "ts-node": "^10.9.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

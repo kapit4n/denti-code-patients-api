@@ -1,0 +1,22 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:../patients.sqlite" // Points to your SQLite file
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Patients {
+  PatientID             Int      @id @default(autoincrement())
+  FirstName             String
+  LastName              String
+  DateOfBirth           String   // Storing as YYYY-MM-DD string
+  Gender                String?  // The '?' makes it optional
+  Address               String?
+  ContactPhone          String   @unique // Ensures no two patients have the same phone
+  Email                 String?  @unique
+  MedicalHistorySummary String?
+  RegistrationDate      DateTime @default(now())
+  LastVisitDate         DateTime?
+}
