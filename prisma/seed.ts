@@ -15,7 +15,7 @@ async function main() {
       Gender: 'Male',
       Address: 'Av. Arce 2519, La Paz, Bolivia',
       ContactPhone: '+59171234567',
-      Email: 'john.doe@example.com',
+      Email: 'patient1@example.com',
       MedicalHistorySummary: 'No known allergies. History of wisdom tooth extraction in 2010.',
     },
   });

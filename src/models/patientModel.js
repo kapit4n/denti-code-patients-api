@@ -17,6 +17,10 @@ const Patient = {
     const sql = `SELECT * from Patients WHERE PatientID = ?`
     db.get(sql, [id], callback)
   },
+  findByEmail: (email, callback) => {
+    const sql = `SELECT * FROM Patients WHERE Email = ?`;
+    db.get(sql, [email], callback);
+  },
   update: (id, patientData, callback) => {
     const { FirstName, LastName, DateOfBirth, Gender, Address, ContactPhone, Email, MedicalHistorySummary, LastVisitDate } = patientData
 

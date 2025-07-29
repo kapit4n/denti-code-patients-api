@@ -6,6 +6,7 @@ const { requireRole } = require('../middleware/roleValidator')
 
 router.post('/', requireRole('ADMIN'), postValidator, validate, patientController.createPatient)
 router.get('/', patientController.getAllPatients)
+router.get('/me', patientController.getProfile)
 router.get('/:id', patientController.getPatientById)
 router.put('/:id', requireRole('ADMIN'), patientController.updatePatient)
 router.delete('/:id', requireRole('ADMIN'), patientController.deletePatient)
