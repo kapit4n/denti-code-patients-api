@@ -24,21 +24,44 @@ exports.getAllPatients = (req, res, next) => {
 
 exports.getProfile = (req, res, next) => {
   const userEmail = req.headers['x-user-email'];
-  
-  console.log(userEmail)
 
   if (!userEmail) {
     return res.status(401).json({ message: 'Unauthorized: User identity not provided in request.' });
   }
 
-    Patient.findByEmail(userEmail, (err, patient) => {
+  Patient.findByEmail(userEmail, (err, patient) => {
     if (err) {
       return next(err);
     }
     if (!patient) {
-      return res.status(404).json({ message: 'Patient profile not found for the logged-in user.' });
+      const now = Date.now();
+      const baseName = String(userEmail).split('@')[0] || 'patient';
+      const autoPatient = {
+        FirstName: baseName.slice(0, 40),
+        LastName: 'User',
+        DateOfBirth: '1900-01-01',
+        Gender: null,
+        Address: null,
+        ContactPhone: `auto-${now}`,
+        Email: userEmail,
+        MedicalHistorySummary: null,
+      };
+
+      return Patient.create(autoPatient, (createErr) => {
+        if (createErr) {
+          return next(createErr);
+        }
+
+        return Patient.findByEmail(userEmail, (findErr, createdPatient) => {
+          if (findErr) return next(findErr);
+          if (!createdPatient) {
+            return res.status(404).json({ message: 'Patient profile not found for the logged-in user.' });
+          }
+          return res.status(200).json(createdPatient);
+        });
+      });
     }
-    res.status(200).json(patient);
+    return res.status(200).json(patient);
   });
 }
 
