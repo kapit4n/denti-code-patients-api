@@ -66,14 +66,19 @@ exports.getProfile = (req, res, next) => {
 }
 
 exports.getPatientById = (req, res, next) => {
-  Patient.findById(req.params.id, (err, patient) => {
+  const id = Number.parseInt(String(req.params.id), 10)
+  if (!Number.isFinite(id) || id < 1) {
+    return res.status(400).json({ message: 'Invalid patient id.' })
+  }
+
+  Patient.findById(id, (err, patient) => {
     if (err) return next(err)
 
-      if (!patient) {
-        return res.status(404).json({ message: 'Patient not found'})
-      }
+    if (!patient) {
+      return res.status(404).json({ message: 'Patient not found' })
+    }
 
-      res.status(200).json(patient)
+    res.status(200).json(patient)
   })
 }
 
