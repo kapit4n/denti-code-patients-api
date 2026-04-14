@@ -8,6 +8,7 @@ router.post('/', requireRole('ADMIN'), postValidator, validate, patientControlle
 // Staff-only: used by doctor UI (patient list, create appointment) and admin
 router.get('/', requireAnyRole('ADMIN', 'DOCTOR'), patientController.getAllPatients)
 router.get('/me', patientController.getProfile)
+router.patch('/me', patientController.patchProfile)
 router.get('/:id', requireAnyRole('ADMIN', 'DOCTOR'), patientController.getPatientById)
 router.put('/:id', requireRole('ADMIN'), patientController.updatePatient)
 router.delete('/:id', requireRole('ADMIN'), patientController.deletePatient)

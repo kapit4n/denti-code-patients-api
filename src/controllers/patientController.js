@@ -65,6 +65,92 @@ exports.getProfile = (req, res, next) => {
   });
 }
 
+exports.patchProfile = (req, res, next) => {
+  const userEmail = req.headers['x-user-email'];
+
+  if (!userEmail) {
+    return res.status(401).json({ message: 'Unauthorized: User identity not provided in request.' });
+  }
+
+  const allowedKeys = new Set([
+    'FirstName',
+    'LastName',
+    'DateOfBirth',
+    'Gender',
+    'Address',
+    'ContactPhone',
+    'MedicalHistorySummary',
+  ]);
+
+  const input = (req.body && typeof req.body === 'object') ? req.body : {};
+  const patch = {};
+  for (const [k, v] of Object.entries(input)) {
+    if (!allowedKeys.has(k)) continue;
+    patch[k] = v;
+  }
+
+  Patient.findByEmail(userEmail, (err, patient) => {
+    if (err) return next(err);
+
+    const ensure = (cb) => {
+      if (patient) return cb(null, patient);
+
+      // Mirror GET /me behavior: if no patient exists yet, create a placeholder then patch it.
+      const now = Date.now();
+      const baseName = String(userEmail).split('@')[0] || 'patient';
+      const autoPatient = {
+        FirstName: baseName.slice(0, 40),
+        LastName: 'User',
+        DateOfBirth: '1900-01-01',
+        Gender: null,
+        Address: null,
+        ContactPhone: `auto-${now}`,
+        Email: userEmail,
+        MedicalHistorySummary: null,
+      };
+
+      return Patient.create(autoPatient, (createErr) => {
+        if (createErr) return next(createErr);
+        return Patient.findByEmail(userEmail, (findErr, created) => {
+          if (findErr) return next(findErr);
+          if (!created) return res.status(404).json({ message: 'Patient profile not found for the logged-in user.' });
+          return cb(null, created);
+        });
+      });
+    };
+
+    ensure((ensureErr, ensured) => {
+      if (ensureErr) return next(ensureErr);
+
+      const merged = {
+        ...ensured,
+        ...patch,
+        // Never allow changing email via PATCH /me.
+        Email: ensured.Email,
+      };
+
+      Patient.update(ensured.PatientID, merged, (updateErr, result) => {
+        if (updateErr) {
+          if (updateErr.message?.includes('UNIQUE constraint failed: Patients.ContactPhone')) {
+            return res.status(409).json({ message: 'Conflict: Contact phone already exists.'})
+          }
+          if (updateErr.message?.includes('UNIQUE constraint failed: Patients.Email')) {
+            return res.status(409).json({ message: 'Conflict: Email already exists.'})
+          }
+          return next(updateErr);
+        }
+        if (!result || result.changes === 0) {
+          return res.status(404).json({ message: 'Patient not found or no changes made' });
+        }
+        return Patient.findByEmail(userEmail, (findErr, updated) => {
+          if (findErr) return next(findErr);
+          return res.status(200).json(updated ?? merged);
+        });
+      });
+    });
+  });
+};
+
 exports.getPatientById = (req, res, next) => {
   const id = Number.parseInt(String(req.params.id), 10)
   if (!Number.isFinite(id) || id < 1) {
