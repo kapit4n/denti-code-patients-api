@@ -1,7 +1,20 @@
 const Patient = require('../models/patientModel')
 
 exports.createPatient = (req, res, next) => {
-  Patient.create(req.body, (err, result) => {
+  const emailRaw = req.body.Email
+  const email =
+    emailRaw && typeof emailRaw === 'string' && emailRaw.trim() ? emailRaw.trim() : null
+  const payload = {
+    FirstName: req.body.FirstName,
+    LastName: req.body.LastName,
+    DateOfBirth: req.body.DateOfBirth,
+    Gender: req.body.Gender ?? null,
+    Address: req.body.Address ?? null,
+    ContactPhone: req.body.ContactPhone,
+    Email: email,
+    MedicalHistorySummary: req.body.MedicalHistorySummary ?? null,
+  }
+  Patient.create(payload, (err, result) => {
     if (err) {
       if (err.message.includes('UNIQUE constraint failed: Patients.ContactPhone')) {
         return res.status(409).json({ message: 'Conflict: Contact phone already exists.'})
