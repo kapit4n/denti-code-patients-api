@@ -80,6 +80,7 @@ exports.patchProfile = (req, res, next) => {
     'Address',
     'ContactPhone',
     'MedicalHistorySummary',
+    'AvatarUrl',
   ]);
 
   const input = (req.body && typeof req.body === 'object') ? req.body : {};
@@ -87,6 +88,22 @@ exports.patchProfile = (req, res, next) => {
   for (const [k, v] of Object.entries(input)) {
     if (!allowedKeys.has(k)) continue;
     patch[k] = v;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(patch, 'AvatarUrl')) {
+    const raw = patch.AvatarUrl;
+    if (raw === '' || raw === null) {
+      patch.AvatarUrl = null;
+    } else if (typeof raw === 'string') {
+      const u = raw.trim().slice(0, 2048);
+      const ok = /^(\/avatars\/[\w.-]+|https?:\/\/.+)$/.test(u);
+      if (!ok) {
+        return res.status(400).json({ message: 'Invalid AvatarUrl. Use a path under /avatars/ or an http(s) URL.' });
+      }
+      patch.AvatarUrl = u;
+    } else {
+      return res.status(400).json({ message: 'AvatarUrl must be a string or null.' });
+    }
   }
 
   Patient.findByEmail(userEmail, (err, patient) => {
@@ -169,12 +186,23 @@ exports.getPatientById = (req, res, next) => {
 }
 
 exports.updatePatient = (req, res, next) => {
-  Patient.update(req.params.id, req.body, (err, result) => {
-    if (err) return next(err)
-    if (result.changes === 0) {
-      return res.status(404).json({ message: 'Patient not found or no changes made' })
+  const id = Number.parseInt(String(req.params.id), 10)
+  if (!Number.isFinite(id) || id < 1) {
+    return res.status(400).json({ message: 'Invalid patient id.' })
+  }
+  Patient.findById(id, (findErr, existing) => {
+    if (findErr) return next(findErr)
+    if (!existing) {
+      return res.status(404).json({ message: 'Patient not found' })
     }
-    res.status(200).json({ message: 'Patient updated successfully'})
+    const merged = { ...existing, ...req.body, PatientID: existing.PatientID }
+    Patient.update(id, merged, (err, result) => {
+      if (err) return next(err)
+      if (result.changes === 0) {
+        return res.status(404).json({ message: 'Patient not found or no changes made' })
+      }
+      res.status(200).json({ message: 'Patient updated successfully'})
+    })
   })
 }
 

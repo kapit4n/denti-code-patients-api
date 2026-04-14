@@ -16,6 +16,7 @@ model Patients {
   Address               String?
   ContactPhone          String   @unique // Ensures no two patients have the same phone
   Email                 String?  @unique
+  AvatarUrl             String?
   MedicalHistorySummary String?
   RegistrationDate      DateTime @default(now())
   LastVisitDate         DateTime?

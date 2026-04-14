@@ -2,10 +2,10 @@ const db = require('../config/database')
 
 const Patient = {
   create: (patientData, callback) => {
-    const { FirstName, LastName, DateOfBirth, Gender, Address, ContactPhone, Email, MedicalHistorySummary } = patientData
-    const sql = `INSERT INTO Patients (FirstName, LastName, DateOfBirth, Gender, Address, ContactPhone, Email, MedicalHistorySummary)
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-    db.run(sql, [FirstName, LastName, DateOfBirth, Gender, Address, ContactPhone, Email, MedicalHistorySummary], function(err) {
+    const { FirstName, LastName, DateOfBirth, Gender, Address, ContactPhone, Email, MedicalHistorySummary, AvatarUrl } = patientData
+    const sql = `INSERT INTO Patients (FirstName, LastName, DateOfBirth, Gender, Address, ContactPhone, Email, MedicalHistorySummary, AvatarUrl)
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    db.run(sql, [FirstName, LastName, DateOfBirth, Gender, Address, ContactPhone, Email, MedicalHistorySummary, AvatarUrl ?? null], function(err) {
       callback(err, {id: this ? this.lastID : null})
     })
   },
@@ -22,15 +22,15 @@ const Patient = {
     db.get(sql, [email], callback);
   },
   update: (id, patientData, callback) => {
-    const { FirstName, LastName, DateOfBirth, Gender, Address, ContactPhone, Email, MedicalHistorySummary, LastVisitDate } = patientData
+    const { FirstName, LastName, DateOfBirth, Gender, Address, ContactPhone, Email, MedicalHistorySummary, AvatarUrl, LastVisitDate } = patientData
 
     const sql = `UPDATE Patients SET
                         FirstName = ?, LastName = ?, DateOfBirth = ?, Gender = ?,
                         Address = ?, ContactPhone = ?, Email = ?, MedicalHistorySummary = ?,
-                        LastVisitDate = COALESCE(?, LastVisitDate)
+                        AvatarUrl = ?, LastVisitDate = COALESCE(?, LastVisitDate)
                      WHERE PatientID = ?`;
     
-    db.run(sql, [FirstName, LastName, DateOfBirth, Gender, Address, ContactPhone, Email, MedicalHistorySummary, LastVisitDate, id], function (err) {
+    db.run(sql, [FirstName, LastName, DateOfBirth, Gender, Address, ContactPhone, Email, MedicalHistorySummary, AvatarUrl ?? null, LastVisitDate, id], function (err) {
       callback(err, { changes: this ? this.changes: 0 })
     })
   },
