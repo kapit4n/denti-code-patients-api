@@ -10,7 +10,7 @@ router.get('/', requireAnyRole('ADMIN', 'DOCTOR'), patientController.getAllPatie
 router.get('/me', patientController.getProfile)
 router.patch('/me', patientController.patchProfile)
 router.get('/:id', requireAnyRole('ADMIN', 'DOCTOR'), patientController.getPatientById)
-router.put('/:id', requireRole('ADMIN'), patientController.updatePatient)
+router.put('/:id', requireAnyRole('ADMIN', 'DOCTOR'), patientController.updatePatient)
 router.delete('/:id', requireRole('ADMIN'), patientController.deletePatient)
 
 module.exports = router

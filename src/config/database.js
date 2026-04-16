@@ -32,6 +32,28 @@ function ensurePatientColumns(callback) {
   });
 }
 
+function ensurePaymentsColumns(callback) {
+  db.all('PRAGMA table_info(Payments)', (pragmaErr, rows) => {
+    if (pragmaErr) {
+      return callback(pragmaErr);
+    }
+    const have = new Set((rows || []).map((r) => r.name));
+    const alters = [];
+    if (!have.has('AppointmentID')) {
+      alters.push('ALTER TABLE Payments ADD COLUMN AppointmentID INTEGER');
+    }
+
+    let i = 0;
+    function runNext(err) {
+      if (err) return callback(err);
+      if (i >= alters.length) return callback(null);
+      const sql = alters[i++];
+      db.run(sql, runNext);
+    }
+    runNext(null);
+  });
+}
+
 const db = new sqlite3.Database(DB_PATH, (openErr) => {
   if (openErr) {
     console.error('Error opening database', openErr.message);
@@ -64,6 +86,32 @@ const db = new sqlite3.Database(DB_PATH, (openErr) => {
           console.error('Error aligning Patients columns', ensureErr.message);
         } else {
           console.log('Patients column migration check finished');
+        }
+      });
+    },
+  );
+
+  db.run(
+    `CREATE TABLE IF NOT EXISTS Payments (
+            PaymentID INTEGER PRIMARY KEY AUTOINCREMENT,
+            PatientID INTEGER NOT NULL,
+            Amount REAL NOT NULL,
+            Method TEXT,
+            Note TEXT,
+            PaidAt TEXT DEFAULT (datetime('now', 'localtime')),
+            AppointmentID INTEGER
+        )`,
+    (createErr) => {
+      if (createErr) {
+        console.error('Error creating Payments table', createErr.message);
+        return;
+      }
+      console.log('Payments table checked/created successfully');
+      ensurePaymentsColumns((ensureErr) => {
+        if (ensureErr) {
+          console.error('Error aligning Payments columns', ensureErr.message);
+        } else {
+          console.log('Payments column migration check finished');
         }
       });
     },

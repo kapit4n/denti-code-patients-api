@@ -208,13 +208,29 @@ exports.updatePatient = (req, res, next) => {
     if (!existing) {
       return res.status(404).json({ message: 'Patient not found' })
     }
-    const merged = { ...existing, ...req.body, PatientID: existing.PatientID }
+    const patch = { ...req.body }
+    if (Object.prototype.hasOwnProperty.call(patch, 'Email')) {
+      const e = patch.Email
+      patch.Email = e && typeof e === 'string' && e.trim() ? e.trim() : null
+    }
+    const merged = { ...existing, ...patch, PatientID: existing.PatientID }
     Patient.update(id, merged, (err, result) => {
-      if (err) return next(err)
+      if (err) {
+        if (err.message?.includes('UNIQUE constraint failed: Patients.ContactPhone')) {
+          return res.status(409).json({ message: 'Conflict: Contact phone already exists.' })
+        }
+        if (err.message?.includes('UNIQUE constraint failed: Patients.Email')) {
+          return res.status(409).json({ message: 'Conflict: Email already exists.' })
+        }
+        return next(err)
+      }
       if (result.changes === 0) {
         return res.status(404).json({ message: 'Patient not found or no changes made' })
       }
-      res.status(200).json({ message: 'Patient updated successfully'})
+      Patient.findById(id, (reloadErr, updated) => {
+        if (reloadErr) return next(reloadErr)
+        return res.status(200).json(updated)
+      })
     })
   })
 }
